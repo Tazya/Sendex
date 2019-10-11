@@ -4,6 +4,10 @@ $xpdo_meta_map['sxQueue']= array (
   'version' => '1.1',
   'table' => 'sendex_queue',
   'extends' => 'xPDOSimpleObject',
+  'tableMeta' => 
+  array (
+    'engine' => 'MyISAM',
+  ),
   'fields' => 
   array (
     'newsletter_id' => 0,

@@ -4,6 +4,10 @@ $xpdo_meta_map['sxNewsletter']= array (
   'version' => '1.1',
   'table' => 'sendex_newsletters',
   'extends' => 'xPDOSimpleObject',
+  'tableMeta' => 
+  array (
+    'engine' => 'MyISAM',
+  ),
   'fields' => 
   array (
     'name' => '',
