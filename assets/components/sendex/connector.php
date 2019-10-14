@@ -11,6 +11,7 @@ else {
 }
 require_once MODX_CORE_PATH . 'config/' . MODX_CONFIG_KEY . '.inc.php';
 require_once MODX_CONNECTORS_PATH . 'index.php';
+$corePath = $modx->getOption('sendex_core_path', null, $modx->getOption('core_path') . 'components/sendex/');
 require_once $corePath . 'model/sendex/sendex.class.php';
 $modx->sendex = new Sendex($modx);
 $modx->lexicon->load('sendex:default');
