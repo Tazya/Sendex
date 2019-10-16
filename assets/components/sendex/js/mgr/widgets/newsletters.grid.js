@@ -6,14 +6,22 @@ Sendex.grid.Newsletters = function(config) {
 		,baseParams: {
 			action: 'mgr/newsletter/getlist'
 		}
-		,fields: ['id','name','description']
+		,fields: ['id','name','description','active','template','snippet','image','email_subject','email_from','email_from_name','email_reply']
 		,autoHeight: true
 		,paging: true
 		,remoteSort: true
 		,columns: [
-			{header: _('id'),dataIndex: 'id',width: 70}
-			,{header: _('name'),dataIndex: 'name',width: 200}
-			,{header: _('description'),dataIndex: 'description',width: 250}
+			{header: _('sendex_newsletter_id'),dataIndex: 'id',width: 50}
+			,{header: _('sendex_newsletter_name'),dataIndex: 'name',width: 100}
+			// ,{header: _('sendex_newsletter_description'),dataIndex: 'description',width: 250}
+			,{header: _('sendex_newsletter_active'),dataIndex: 'active',width: 75, renderer: this.renderBoolean}
+			,{header: _('sendex_newsletter_template'),dataIndex: 'template',width: 75}
+			,{header: _('sendex_newsletter_snippet'),dataIndex: 'snippet',width: 75}
+			,{header: _('sendex_newsletter_email_subject'),dataIndex: 'description',width: 100}
+			,{header: _('sendex_newsletter_email_from'),dataIndex: 'email_from',width: 100}
+			// ,{header: _('sendex_newsletter_email_from_name'),dataIndex: 'email_from_name',width: 100}
+			// ,{header: _('sendex_newsletter_email_reply'),dataIndex: 'email_reply',width: 100}
+			,{header: _('sendex_newsletter_image'),dataIndex: 'image',width: 75, renderer: this.renderImage}
 		]
 		,tbar: [{
 			text: _('sendex_btn_create')
@@ -104,35 +112,75 @@ Ext.extend(Sendex.grid.Newsletters,MODx.grid.Grid,{
 			}
 		});
 	}
+	,renderBoolean: function(val,cell,row) {
+		return val === '' || val === 0
+			? '<span style="color:red">' + _('no') + '<span>'
+			: '<span style="color:green">' + _('yes') + '<span>';
+	}
+
+
+	,renderImage: function(val,cell,row) {
+		return val !== ''
+			? '<img src="' + val + '" alt="" height="50" />'
+			: '';
+	}
 });
 Ext.reg('sendex-grid-newsletters',Sendex.grid.Newsletters);
 
 
 
 
-Sendex.window.CreateItem = function(config) {
+Sendex.window.CreateNewsletter = function(config) {
 	config = config || {};
 	this.ident = config.ident || 'mecnewsletter'+Ext.id();
 	Ext.applyIf(config,{
 		title: _('sendex_newsletter_create')
 		,id: this.ident
-		,height: 200
-		,width: 475
+		,height: 720
+		,width: 720
 		,url: Sendex.config.connector_url
 		,action: 'mgr/newsletter/create'
 		,fields: [
 			{xtype: 'textfield',fieldLabel: _('name'),name: 'name',id: 'sendex-'+this.ident+'-name',anchor: '99%'}
-			,{xtype: 'textarea',fieldLabel: _('description'),name: 'description',id: 'sendex-'+this.ident+'-description',height: 150,anchor: '99%'}
+			,{
+				layout:'column'
+				,border: false
+				,anchor: '100%'
+				,items: [{
+					columnWidth: .5
+					,layout: 'form'
+					,defaults: { msgTarget: 'under' }
+					,border:false
+					,items: [
+						{xtype: 'modx-combo-template',fieldLabel: _('sendex_newsletter_template'),name: 'template',id: 'sendex-'+this.ident+'-template',anchor: '99%'}
+						,{xtype: 'textfield',fieldLabel: _('sendex_newsletter_email_subject'),name: 'email_subject',id: 'sendex-'+this.ident+'-email_subject',anchor: '99%'}
+						,{xtype: 'textfield',fieldLabel: _('sendex_newsletter_email_reply'),name: 'email_reply',id: 'sendex-'+this.ident+'-email_reply',anchor: '99%'}
+						,{xtype: 'combo-boolean',fieldLabel: _('sendex_newsletter_active'),name: 'active',hiddenName: 'active',id: 'sendex-'+this.ident+'-active',anchor: '50%'}
+					]
+				},{
+					columnWidth: .5
+					,layout: 'form'
+					,defaults: { msgTarget: 'under' }
+					,border:false
+					,items: [
+						{xtype: 'sendex-combo-snippet',fieldLabel: _('sendex_newsletter_snippet'),name: 'snippet',id: 'sendex-'+this.ident+'-snippet',anchor: '99%'}
+						,{xtype: 'textfield',fieldLabel: _('sendex_newsletter_email_from'),name: 'email_from',id: 'sendex-'+this.ident+'-email_from',anchor: '99%'}
+						,{xtype: 'textfield',fieldLabel: _('sendex_newsletter_email_from_name'),name: 'email_from_name',id: 'sendex-'+this.ident+'-email_from_name',anchor: '99%'}
+						,{xtype: 'modx-combo-browser',fieldLabel: _('sendex_newsletter_image'),name: 'image',id: 'sendex-'+this.ident+'-image',anchor: '99%'}
+					]
+				}]
+			}
+			,{xtype: 'textarea',fieldLabel: _('description'),name: 'description',id: 'sendex-'+this.ident+'-description',height: 75,anchor: '99%'}
 		]
 		,keys: [{key: Ext.EventObject.ENTER,shift: true,fn: function() {this.submit() },scope: this}]
 	});
-	Sendex.window.CreateItem.superclass.constructor.call(this,config);
+	Sendex.window.CreateNewsletter.superclass.constructor.call(this,config);
 };
-Ext.extend(Sendex.window.CreateItem,MODx.Window);
-Ext.reg('sendex-window-newsletter-create',Sendex.window.CreateItem);
+Ext.extend(Sendex.window.CreateNewsletter,MODx.Window);
+Ext.reg('sendex-window-newsletter-create',Sendex.window.CreateNewsletter);
 
 
-Sendex.window.UpdateItem = function(config) {
+Sendex.window.UpdateNewsletter = function(config) {
 	config = config || {};
 	this.ident = config.ident || 'meunewsletter'+Ext.id();
 	Ext.applyIf(config,{
@@ -149,7 +197,7 @@ Sendex.window.UpdateItem = function(config) {
 		]
 		,keys: [{key: Ext.EventObject.ENTER,shift: true,fn: function() {this.submit() },scope: this}]
 	});
-	Sendex.window.UpdateItem.superclass.constructor.call(this,config);
+	Sendex.window.UpdateNewsletter.superclass.constructor.call(this,config);
 };
-Ext.extend(Sendex.window.UpdateItem,MODx.Window);
-Ext.reg('sendex-window-newsletter-update',Sendex.window.UpdateItem);
+Ext.extend(Sendex.window.UpdateNewsletter,MODx.Window);
+Ext.reg('sendex-window-newsletter-update',Sendex.window.UpdateNewsletter);
