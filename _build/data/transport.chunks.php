@@ -3,8 +3,8 @@
 $chunks = array();
 
 $tmp = array(
-	'tpl.Sendex.newsletter' => array(
-		'file' => 'newsletter',
+	'tpl.Sendex.subscriber' => array(
+		'file' => 'subscriber',
 		'description' => '',
 	),
 );
