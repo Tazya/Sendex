@@ -19,7 +19,7 @@ class sxNewsletter extends xPDOSimpleObject {
             $snippet->setCacheable(false);
         } elseif ($this->get('template')) {
             /** @var modTempalte $template */
-            $template = $this->xpdo->getObject('modSnippet', $this->template);
+            $template = $this->xpdo->getObject('modTemplate', $this->template);
             $template->setCacheable(false);
         }
 
