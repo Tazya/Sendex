@@ -3,7 +3,7 @@
  * Add a list of Queues
  */
 
- class sxQueueAddProcessor extends modProcessor {
+class sxQueueAddProcessor extends modProcessor {
     public $objectType = 'sxQueue';
     public $classKey = 'sqQueue';
 
@@ -25,7 +25,6 @@
             return $this->success();
         }
     }
- }
+}
 
- return 'sxQueueProcessor';
- 
+return 'sxQueueAddProcessor';

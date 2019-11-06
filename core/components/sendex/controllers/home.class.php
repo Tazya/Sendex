@@ -9,17 +9,23 @@ require_once dirname(dirname(__FILE__)) . "/index.class.php";
 class SendexHomeManagerController extends SendexMainController {
     /* @var Sendex $Sendex */
     public $Sendex;
+
+
     /**
      * @param array $scriptProperties
      */
     public function process(array $scriptProperties = array()) {
     }
+
+
     /**
      * @return null|string
      */
     public function getPageTitle() {
         return $this->modx->lexicon('sendex');
     }
+
+
     /**
      * @return void
      */
@@ -35,6 +41,8 @@ class SendexHomeManagerController extends SendexMainController {
 		});
 		</script>');
     }
+
+    
     /**
      * @return string
      */

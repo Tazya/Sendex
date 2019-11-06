@@ -2,7 +2,7 @@
 /**
  * Get a list of Queues
  */
-class sxQueueGetListProcessor extends modObjectsGetListProcessor {
+class sxQueueGetListProcessor extends modObjectGetListProcessor {
     public $objectType = 'sxQueue';
     public $classKey = 'sxQueue';
     public $defaultSortField = 'id';
