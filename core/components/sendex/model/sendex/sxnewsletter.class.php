@@ -1,5 +1,7 @@
 <?php
 class sxNewsletter extends xPDOSimpleObject {
+
+
 	/**
 	 * Prepares emails and set them to queue
 	 *
@@ -10,15 +12,18 @@ class sxNewsletter extends xPDOSimpleObject {
 		$params = $this->toArray();
 		/** @var modParser $parser */
 		$parser = $this->xpdo->getService('parser', $this->xpdo->getOption('parser_class', null, 'modParser'), $this->xpdo->getOption('parser_class_path', null, ''));
+	
 		if ($this->get('snippet')) {
 			/** @var modSnippet $snippet */
 			$snippet = $this->xpdo->getObject('modSnippet', $this->snippet);
+			$snippet->setCacheable(false);
 		}
 		elseif ($this->get('template')) {
 			/** @var modTemplate $template */
 			$template = $this->xpdo->getObject('modTemplate', $this->template);
 			$template->setCacheable(false);
 		}
+	
 		if (!$subscribers = $this->getMany('Subscribers')) {
 			return $this->xpdo->lexicon('sendex_newsletter_err_no_subscribers');
 		}
@@ -28,6 +33,7 @@ class sxNewsletter extends xPDOSimpleObject {
 				'newsletter' => $params,
 				'user' => $subscriber->toArray()
 			);
+	
 			if ($snippet && $snippet instanceof modSnippet) {
 				$body = $snippet->process($scriptProperties);
 			}
@@ -37,11 +43,13 @@ class sxNewsletter extends xPDOSimpleObject {
 			else {
 				return 'Could not prepare email';
 			}
+			
 			if ($parser && $parser instanceof modParser) {
 				$maxIterations = (integer) $this->xpdo->getOption('parser_max_iterations', null, 10);
 				$parser->processElementTags('', $body, false, false, '[[', ']]', array(), $maxIterations);
 				$parser->processElementTags('', $body, true, true, '[[', ']]', array(), $maxIterations);
 			}
+			
 			// Get email from user profile, if possible
 			/** @var modUser $user */
 			if (!empty($subscriber->subscriber_id) && $user = $this->xpdo->getObject('modUser', $subscriber->subscriber_id)) {
@@ -62,6 +70,7 @@ class sxNewsletter extends xPDOSimpleObject {
 			$from = !empty($this->email_from) ? $this->email_from : $this->xpdo->getOption('emailsender');
 			$from_name = !empty($this->email_from_name) ? $this->email_from_name : $this->xpdo->getOption('site_name');
 			$email_reply = !empty($this->email_reply) ? $this->email_reply : $from;
+			
 			/** @var sxQueue $queue */
 			$queue = $this->xpdo->newObject('sxQueue');
 			$queue->fromArray(array(
@@ -76,6 +85,31 @@ class sxNewsletter extends xPDOSimpleObject {
 			));
 			$queue->save();
 		}
+		
+		
 		return true;
 	}
+
+
+	/**
+	 * Returns status of user for this newsletter
+	 * 
+	 * @param int $user_id
+	 * @param string $email
+	 * 
+	 * @return bool
+	 */
+	public function isSubscribed($user_id = 0, $email = '') {
+		$q = $this->xpdo->newQuery('sxSubscriber', array('newsletter_id' => $this->get('id')));
+
+		if (!empty($id)) {
+			$q->where(array('user_id' => $user_id));
+		}
+		if (!empty($email)) {
+			$q->where(array('email' => $email ));
+		}
+
+		return (bool) $this->xpdo->getCount('sxSubscriber', $q);
+	}
+
 }
