@@ -23,7 +23,10 @@ if ($object->xpdo) {
             $modx->setLogLevel(xPDO::LOG_LEVEL_FATAL);
 
             $manager->addField('sxQueue', 'hash');
-            $manager->addIndex('sxQueue', 'hash');
+			$manager->addIndex('sxQueue', 'hash');
+			
+			$manager->addField('sxSubscriber', 'code');
+			$manager->addIndex('sxSubscriber', 'code');
 
 			$modx->setLogLevel($level);
 			break;

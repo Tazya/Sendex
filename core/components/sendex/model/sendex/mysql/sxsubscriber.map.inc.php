@@ -13,6 +13,7 @@ $xpdo_meta_map['sxSubscriber']= array (
     'newsletter_id' => 0,
     'user_id' => 0,
     'email' => '',
+    'code' => '',
   ),
   'fieldMeta' => 
   array (
@@ -42,6 +43,14 @@ $xpdo_meta_map['sxSubscriber']= array (
       'null' => true,
       'default' => '',
     ),
+    'code' => 
+    array (
+      'dbtype' => 'char',
+      'precision' => '40',
+      'phptype' => 'string',
+      'null' => true,
+      'default' => '',
+    ),
   ),
   'indexes' => 
   array (
@@ -66,6 +75,22 @@ $xpdo_meta_map['sxSubscriber']= array (
           'null' => false,
         ),
         'email' => 
+        array (
+          'length' => '',
+          'collation' => 'A',
+          'null' => false,
+        ),
+      ),
+    ),
+    'code' => 
+    array (
+      'alias' => 'code',
+      'primary' => false,
+      'unique' => true,
+      'type' => 'BTREE',
+      'columns' => 
+      array (
+        'code' => 
         array (
           'length' => '',
           'collation' => 'A',

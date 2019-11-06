@@ -3,10 +3,14 @@
 $chunks = array();
 
 $tmp = array(
-	'tpl.Sendex.subscriber' => array(
-		'file' => 'subscriber',
+	'tpl.Sendex.subscribe.form' => array(
+		'file' => 'subscribe.form',
 		'description' => '',
 	),
+	'tpl.Sendex.unsubscribe.form' => array(
+		'file' => 'unsubscribe.form',
+		'description' => '',
+	)
 );
 
 foreach ($tmp as $k => $v) {
