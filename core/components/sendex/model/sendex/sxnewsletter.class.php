@@ -1,7 +1,5 @@
 <?php
 class sxNewsletter extends xPDOSimpleObject {
-
-
 	/**
 	 * Prepares emails and set them to queue
 	 *
@@ -12,7 +10,6 @@ class sxNewsletter extends xPDOSimpleObject {
 		$params = $this->toArray();
 		/** @var modParser $parser */
 		$parser = $this->xpdo->getService('parser', $this->xpdo->getOption('parser_class', null, 'modParser'), $this->xpdo->getOption('parser_class_path', null, ''));
-	
 		if ($this->get('snippet')) {
 			/** @var modSnippet $snippet */
 			$snippet = $this->xpdo->getObject('modSnippet', $this->snippet);
@@ -23,7 +20,6 @@ class sxNewsletter extends xPDOSimpleObject {
 			$template = $this->xpdo->getObject('modTemplate', $this->template);
 			$template->setCacheable(false);
 		}
-	
 		if (!$subscribers = $this->getMany('Subscribers')) {
 			return $this->xpdo->lexicon('sendex_newsletter_err_no_subscribers');
 		}
@@ -33,7 +29,6 @@ class sxNewsletter extends xPDOSimpleObject {
 				'newsletter' => $params,
 				'user' => $subscriber->toArray()
 			);
-	
 			if ($snippet && $snippet instanceof modSnippet) {
 				$body = $snippet->process($scriptProperties);
 			}
@@ -43,13 +38,11 @@ class sxNewsletter extends xPDOSimpleObject {
 			else {
 				return 'Could not prepare email';
 			}
-			
 			if ($parser && $parser instanceof modParser) {
 				$maxIterations = (integer) $this->xpdo->getOption('parser_max_iterations', null, 10);
 				$parser->processElementTags('', $body, false, false, '[[', ']]', array(), $maxIterations);
 				$parser->processElementTags('', $body, true, true, '[[', ']]', array(), $maxIterations);
 			}
-			
 			// Get email from user profile, if possible
 			/** @var modUser $user */
 			if (!empty($subscriber->subscriber_id) && $user = $this->xpdo->getObject('modUser', $subscriber->subscriber_id)) {
@@ -70,7 +63,6 @@ class sxNewsletter extends xPDOSimpleObject {
 			$from = !empty($this->email_from) ? $this->email_from : $this->xpdo->getOption('emailsender');
 			$from_name = !empty($this->email_from_name) ? $this->email_from_name : $this->xpdo->getOption('site_name');
 			$email_reply = !empty($this->email_reply) ? $this->email_reply : $from;
-			
 			/** @var sxQueue $queue */
 			$queue = $this->xpdo->newObject('sxQueue');
 			$queue->fromArray(array(
@@ -85,30 +77,25 @@ class sxNewsletter extends xPDOSimpleObject {
 			));
 			$queue->save();
 		}
-		
-		
 		return true;
 	}
-
-
 	/**
 	 * Returns status of user for this newsletter
-	 * 
+	 *
 	 * @param int $user_id
 	 * @param string $email
-	 * 
+	 *
 	 * @return int
 	 */
 	public function isSubscribed($user_id = 0, $email = '') {
 		$q = $this->xpdo->newQuery('sxSubscriber', array('newsletter_id' => $this->get('id')));
-
 		if (!empty($id)) {
 			$q->where(array('user_id' => $user_id));
 		}
 		if (!empty($email)) {
-			$q->where(array('email' => $email ));
+			$q->where(array('email' => $email));
 		}
-
+		/** @var sxSubscriber $subscriber */
 		if ($subscriber = $this->xpdo->getObject('sxSubscriber', $q)) {
 			return $subscriber->id;
 		}
@@ -116,39 +103,31 @@ class sxNewsletter extends xPDOSimpleObject {
 			return 0;
 		}
 	}
-
-
 	/**
 	 * Method for send subscription link
-	 * 
+	 *
 	 * @param string $email
 	 * @param int $user_id
 	 * @param int $linkTTL
-	 * 
+	 *
 	 * @return bool|string
 	 */
 	public function checkEmail($email = '', $user_id = 0, $linkTTL = 1800) {
 		if (empty($email) && $profile = $this->xpdo->getObject('modUserProfile', array('internalKey' => $user_id))) {
 			$email = $profile->get('email');
 		}
-
 		if (empty($email) || !preg_match('/.+@.+\..+/i', $email)) {
 			return false;
 		}
 		elseif ($this->isSubscribed($user_id, $email)) {
 			return true;
 		}
-
 		$hash = sha1(uniqid(sha1($email), true));
-
 		/** @var modRegistry $registry */
 		$registry = $this->xpdo->getService('registry', 'registry.modRegistry');
 		$instance = $registry->getRegister('user', 'registry.modDbRegister');
-		$instance->connect;
-
-		//Создаём свой канал
+		$instance->connect();
 		$instance->subscribe('/sendex/subscribe/');
-		//Сохраняем нужные данные
 		$instance->send('/sendex/subscribe/',
 			array(
 				$hash => array(
@@ -161,94 +140,77 @@ class sxNewsletter extends xPDOSimpleObject {
 				'ttl' => $linkTTL
 			)
 		);
-
 		return $hash;
 	}
-
 	/**
 	 * Confirms email of user
-	 * 
+	 *
 	 * @param $hash
-	 * 
+	 *
 	 * @return bool
 	 */
 	public function confirmEmail($hash) {
-
 		if (empty($hash)) {return false;}
-
-		// Подключаем сервис
 		/** @var modRegistry $registry */
 		$registry = $this->xpdo->getService('registry', 'registry.modRegistry');
 		$instance = $registry->getRegister('user', 'registry.modDbRegister');
-
 		$instance->connect();
-		// Подписываемся на канал, указывая уникальный хэш из письма
 		$instance->subscribe('/sendex/subscribe/' . $hash);
-
-		// Читаем данные и удаляем после этого
 		$entry = $instance->read(array('poll_limit' => 1));
-		// Если код верный, и мы что-то прочитали - проверяем и вызываем следующий метод
 		if (!empty($entry[0])) {
 			$entry = reset($entry);
 			if ($this->id != $entry['newsletter_id']) {
 				/** @var sxNewsletter $newsletter */
 				if ($newsletter = $this->xpdo->getObject('sxNewsletter', array('id' => $entry['newsletter_id'], 'active' => 1))) {
 					$newsletter->Subscribe($entry['user_id'], $entry['email']);
-				} else {
+				}
+				else {
 					return false;
 				}
 			}
-		} else {
-			return $this->Subscribe($entry['user_id'], $entry['email']);
+			else {
+				return $this->Subscribe($entry['user_id'], $entry['email']);
+			}
 		}
-
 		return false;
 	}
-
 	/**
 	 * Subscribes user to the newsletter
-	 * 
+	 *
 	 * @param int $user_id
 	 * @param string $email
-	 * 
+	 *
 	 * @return bool
-	 * 
 	 */
 	public function Subscribe($user_id = 0, $email = '') {
 		if (empty($email) && $profile = $this->xpdo->getObject('modUserProfile', array('internalKey' => $user_id))) {
 			$email = $profile->get('email');
 		}
-
-		if (empty($email) || !preg_email('/.+@.+\..+/i', $email)) {
+		if (empty($email) || !preg_match('/.+@.+\..+/i', $email)) {
 			return false;
 		}
 		elseif ($this->isSubscribed($user_id, $email)) {
-			return false;
+			return true;
 		}
-
 		$subscriber = $this->xpdo->newObject('sxSubscriber');
 		$subscriber->fromArray(array(
 			'newsletter_id' => $this->id,
 			'user_id' => $user_id,
 			'email' => $email
 		), '', true, true);
-
 		return $subscriber->save();
 	}
-
 	/**
 	 * Unsubscribes user from the newsletter
-	 * 
+	 *
 	 * @param string $code
-	 * 
+	 *
 	 * @return bool
 	 */
 	public function unSubscribe($code) {
 		if ($subscriber = $this->xpdo->getObject('sxSubscriber', array('code' => $code))) {
 			return $subscriber->remove();
 		}
-
 		return false;
 	}
-
 }

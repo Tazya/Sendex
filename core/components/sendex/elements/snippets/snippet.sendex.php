@@ -1,33 +1,25 @@
 <?php
 /** @var array $scriptProperties */
 /** @var Sendex $Sendex */
-
 $Sendex = $modx->getService('sendex','Sendex',$modx->getOption('sendex_core_path',null,$modx->getOption('core_path').'components/sendex/').'model/sendex/',$scriptProperties);
-if (!($Sendex instanceof Sendex)) return '';
-
 /** @var pdoTools $pdoTools */
 $pdoTools = $modx->getService('pdoTools');
-
 if (!($Sendex instanceof Sendex) || !($pdoTools instanceof pdoTools)) return '';
-
 if (empty($tplActivate)) {$tplActivate = '@INLINE [[+link]]';}
 if (empty($linkTTL)) {$linkTTL = 1800;}
-
 if (!$modx->user->isAuthenticated($modx->context->key)) {
 	return $modx->lexicon('sendex_err_auth_req');
-} elseif (empty($id) || !$newsletter = $modx->getObject('sxNewsletter', $id)) {
+}
+elseif (empty($id) || !$newsletter = $modx->getObject('sxNewsletter', $id)) {
 	return $modx->lexicon('sendex_newsletter_err_ns');
 }
-
 /** @var sxNewsletter $newsletter */
 if (!$newsletter->active && empty($showInactive)) {
 	return $modx->lexicon('sendex_newsletter_err_disabled');
 }
-
 $placeholders = $newsletter->toArray();
 $placeholders['message'] = '';
 $placeholders['error'] = 0;
-
 if ($modx->user->isAuthenticated($modx->context->key)) {
 	$placeholders = array_merge(
 		$modx->user->toArray(),
@@ -35,16 +27,14 @@ if ($modx->user->isAuthenticated($modx->context->key)) {
 		$placeholders
 	);
 }
-
-if(!empty($REQUEST['sx_action'])) {
+if (!empty($_REQUEST['sx_action'])) {
 	$params = $_GET;
 	unset($params[$modx->getOption('request_param_alias')]);
 	unset($params[$modx->getOption('request_param_id')]);
-
 	switch ($_REQUEST['sx_action']) {
 		case 'subscribe':
 			if (!empty($_REQUEST['email'])) {
-				$email = htmlentities(strip_tags(urldecode($_REQUEST)));
+				$email = htmlentities(strip_tags(urldecode($_REQUEST['email'])));
 				$response = $newsletter->checkEmail($email, $modx->user->id, $linkTTL);
 				if ($response === true) {
 					$placeholders['message'] = $modx->lexicon('sendex_subscribe_err_already');
@@ -68,7 +58,7 @@ if(!empty($REQUEST['sx_action'])) {
 			unset($params['email'], $params['hash']);
 			break;
 		case 'confirm':
-			if(!empty($_REQUEST['hash'])) {
+			if (!empty($_REQUEST['hash'])) {
 				$response = $newsletter->confirmEmail($_REQUEST['hash']);
 				unset($params['hash']);
 			}
@@ -80,24 +70,21 @@ if(!empty($REQUEST['sx_action'])) {
 			unset($params['code']);
 			break;
 	}
-
 	unset($params['sx_action']);
 	if (empty($placeholders['message'])) {
 		$modx->sendRedirect($modx->makeUrl($modx->resource->id, $modx->context->key, $params, 'full'));
 	}
 }
-
-
-if ($newsletter->isSubscribed($modx->user->id)) {
+if ($id = $newsletter->isSubscribed($modx->user->id)) {
 	if ($subscriber = $modx->getObject('sxSubscriber', $id)) {
 		$placeholders = array_merge($subscriber->toArray(), $placeholders);
 	}
 	return !empty($tplUnsubscribeForm)
-	? $pdoTools->getChunk($tplUnsubscribeForm, $placeholders)
-	: 'Parameter "tplUnsubscribeForm" is empty';
+		? $pdoTools->getChunk($tplUnsubscribeForm, $placeholders)
+		: 'Parameter "tplUnsubscribeForm" is empty';
 }
 else {
 	return !empty($tplSubscribeForm)
-	? $pdoTools->getChunk($tplSubscribeForm, $placeholders)
-	: 'Parameter "tplSubscribeForm" is empty'; 
+		? $pdoTools->getChunk($tplSubscribeForm, $placeholders)
+		: 'Parameter "tplSubscribeForm" is empty';
 }
