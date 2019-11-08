@@ -10,6 +10,10 @@ $tmp = array(
 	'tpl.Sendex.unsubscribe.form' => array(
 		'file' => 'unsubscribe.form',
 		'description' => '',
+	),
+	'tpl.Sendex.subscribe.activate' => array(
+		'file' => 'subscribe.activate',
+		'description' => '',
 	)
 );
 

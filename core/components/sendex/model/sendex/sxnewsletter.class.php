@@ -97,7 +97,7 @@ class sxNewsletter extends xPDOSimpleObject {
 	 * @param int $user_id
 	 * @param string $email
 	 * 
-	 * @return bool
+	 * @return int
 	 */
 	public function isSubscribed($user_id = 0, $email = '') {
 		$q = $this->xpdo->newQuery('sxSubscriber', array('newsletter_id' => $this->get('id')));
@@ -109,7 +109,146 @@ class sxNewsletter extends xPDOSimpleObject {
 			$q->where(array('email' => $email ));
 		}
 
-		return (bool) $this->xpdo->getCount('sxSubscriber', $q);
+		if ($subscriber = $this->xpdo->getObject('sxSubscriber', $q)) {
+			return $subscriber->id;
+		}
+		else {
+			return 0;
+		}
+	}
+
+
+	/**
+	 * Method for send subscription link
+	 * 
+	 * @param string $email
+	 * @param int $user_id
+	 * @param int $linkTTL
+	 * 
+	 * @return bool|string
+	 */
+	public function checkEmail($email = '', $user_id = 0, $linkTTL = 1800) {
+		if (empty($email) && $profile = $this->xpdo->getObject('modUserProfile', array('internalKey' => $user_id))) {
+			$email = $profile->get('email');
+		}
+
+		if (empty($email) || !preg_match('/.+@.+\..+/i', $email)) {
+			return false;
+		}
+		elseif ($this->isSubscribed($user_id, $email)) {
+			return true;
+		}
+
+		$hash = sha1(uniqid(sha1($email), true));
+
+		/** @var modRegistry $registry */
+		$registry = $this->xpdo->getService('registry', 'registry.modRegistry');
+		$instance = $registry->getRegister('user', 'registry.modDbRegister');
+		$instance->connect;
+
+		//Создаём свой канал
+		$instance->subscribe('/sendex/subscribe/');
+		//Сохраняем нужные данные
+		$instance->send('/sendex/subscribe/',
+			array(
+				$hash => array(
+					'user_id' => $user_id,
+					'newsletter_id' => $this->id,
+					'email' => $email,
+				)
+			),
+			array(
+				'ttl' => $linkTTL
+			)
+		);
+
+		return $hash;
+	}
+
+	/**
+	 * Confirms email of user
+	 * 
+	 * @param $hash
+	 * 
+	 * @return bool
+	 */
+	public function confirmEmail($hash) {
+
+		if (empty($hash)) {return false;}
+
+		// Подключаем сервис
+		/** @var modRegistry $registry */
+		$registry = $this->xpdo->getService('registry', 'registry.modRegistry');
+		$instance = $registry->getRegister('user', 'registry.modDbRegister');
+
+		$instance->connect();
+		// Подписываемся на канал, указывая уникальный хэш из письма
+		$instance->subscribe('/sendex/subscribe/' . $hash);
+
+		// Читаем данные и удаляем после этого
+		$entry = $instance->read(array('poll_limit' => 1));
+		// Если код верный, и мы что-то прочитали - проверяем и вызываем следующий метод
+		if (!empty($entry[0])) {
+			$entry = reset($entry);
+			if ($this->id != $entry['newsletter_id']) {
+				/** @var sxNewsletter $newsletter */
+				if ($newsletter = $this->xpdo->getObject('sxNewsletter', array('id' => $entry['newsletter_id'], 'active' => 1))) {
+					$newsletter->Subscribe($entry['user_id'], $entry['email']);
+				} else {
+					return false;
+				}
+			}
+		} else {
+			return $this->Subscribe($entry['user_id'], $entry['email']);
+		}
+
+		return false;
+	}
+
+	/**
+	 * Subscribes user to the newsletter
+	 * 
+	 * @param int $user_id
+	 * @param string $email
+	 * 
+	 * @return bool
+	 * 
+	 */
+	public function Subscribe($user_id = 0, $email = '') {
+		if (empty($email) && $profile = $this->xpdo->getObject('modUserProfile', array('internalKey' => $user_id))) {
+			$email = $profile->get('email');
+		}
+
+		if (empty($email) || !preg_email('/.+@.+\..+/i', $email)) {
+			return false;
+		}
+		elseif ($this->isSubscribed($user_id, $email)) {
+			return false;
+		}
+
+		$subscriber = $this->xpdo->newObject('sxSubscriber');
+		$subscriber->fromArray(array(
+			'newsletter_id' => $this->id,
+			'user_id' => $user_id,
+			'email' => $email
+		), '', true, true);
+
+		return $subscriber->save();
+	}
+
+	/**
+	 * Unsubscribes user from the newsletter
+	 * 
+	 * @param string $code
+	 * 
+	 * @return bool
+	 */
+	public function unSubscribe($code) {
+		if ($subscriber = $this->xpdo->getObject('sxSubscriber', array('code' => $code))) {
+			return $subscriber->remove();
+		}
+
+		return false;
 	}
 
 }

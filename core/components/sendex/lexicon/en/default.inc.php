@@ -1,20 +1,15 @@
 <?php
-
 include_once 'setting.inc.php';
-
 $_lang['sendex'] = 'Sendex';
 $_lang['sendex_menu_desc'] = 'Newsletters management';
-
 $_lang['sendex_newsletters'] = 'Newsletters';
 $_lang['sendex_newsletter'] = 'Newsletter';
 $_lang['sendex_newsletters_intro'] = 'On this page you create and edit your subscription.';
-
 $_lang['sendex_btn_create'] = 'Create';
 $_lang['sendex_btn_subscribe'] = 'Subscribe!';
 $_lang['sendex_btn_unsubscribe'] = 'Unsubscribe';
 $_lang['sendex_select_user'] = 'Select user';
 $_lang['sendex_select_newsletter'] = 'Add letters in the queue';
-
 $_lang['sendex_newsletter_err_ae'] = 'An newsletter already exists with that name.';
 $_lang['sendex_newsletter_err_nf'] = 'Newsletter not found.';
 $_lang['sendex_newsletter_err_ns'] = 'Newsletter not specified.';
@@ -29,7 +24,6 @@ $_lang['sendex_newsletter_remove_confirm'] = 'Are you sure you want to remove th
 $_lang['sendex_newsletter_create'] = 'Create newsletter';
 $_lang['sendex_newsletter_update'] = 'Update newsletter';
 $_lang['sendex_newsletter_id'] = 'id';
-
 $_lang['sendex_newsletter_name'] = 'Title';
 $_lang['sendex_newsletter_description'] = 'Description';
 $_lang['sendex_newsletter_active'] = 'Active';
@@ -41,31 +35,24 @@ $_lang['sendex_newsletter_email_from_name'] = 'Email from name';
 $_lang['sendex_newsletter_email_reply'] = 'Email reply';
 $_lang['sendex_newsletter_image'] = 'Image';
 $_lang['sendex_subscribers'] = 'Subscribers';
-
 $_lang['sendex_subscriber'] = 'Subscriber';
 $_lang['sendex_subscriber_err_ae'] = 'This user is already subscribed.';
-
 $_lang['sendex_subscriber_err_nf'] = 'Subscriber not found.';
 $_lang['sendex_subscriber_err_ns'] = 'Subscriber not set.';
 $_lang['sendex_subscriber_err_remove'] = 'Error when remove subscriber.';
 $_lang['sendex_subscriber_err_save'] = 'Error when save subscriber.';
 $_lang['sendex_subscriber_err_email'] = 'Email of subscriber is not set.';
 $_lang['sendex_subscriber_id'] = 'id';
-
 $_lang['sendex_subscriber_username'] = 'Username';
 $_lang['sendex_subscriber_fullname'] = 'Fullname';
 $_lang['sendex_subscriber_email'] = 'Email';
 $_lang['sendex_subscriber_remove'] = 'Remove subscriber';
-$_lang['sendex_subscriber_remove_confirm'] = 'Do you really want unsubscribe subscriber from this newsletter?'; 
 $_lang['sendex_subscriber_remove_confirm'] = 'Do you really want unsubscribe subscriber from this newsletter?';
-
 $_lang['sendex_queues'] = 'Email queue';
 $_lang['sendex_queue'] = 'Queue';
 $_lang['sendex_queue_intro'] = 'Here you control the queue distribution. You can add, delete and send letters.';
-
 $_lang['sendex_queue_err_nf'] = 'Queue not found.';
 $_lang['sendex_queue_err_ns'] = 'Queue not specified.';
-
 $_lang['sendex_queue_id'] = 'id';
 $_lang['sendex_queue_newsletter_id'] = 'Newsletter id';
 $_lang['sendex_queue_subscriber_id'] = 'Subscriber id';
@@ -76,7 +63,6 @@ $_lang['sendex_queue_email_body'] = 'Email body';
 $_lang['sendex_queue_email_from'] = 'Email from';
 $_lang['sendex_queue_email_from_name'] = 'Email from name';
 $_lang['sendex_queue_email_reply'] = 'Reply to';
-
 $_lang['sendex_queue_update'] = 'Update letter';
 $_lang['sendex_queue_send'] = 'Send letter';
 $_lang['sendex_queue_remove'] = 'Remove letter';
@@ -84,3 +70,7 @@ $_lang['sendex_queue_remove_confirm'] = 'Are you sure you want to remove this le
 $_lang['sendex_err_auth_req'] = 'You must be authorized for work with newsletters.';
 $_lang['sendex_subscribe_intro'] = 'You can subscribe to newsletter "[[+name]]"!';
 $_lang['sendex_unsubscribe_intro'] = 'You already subscribed to newsletter "[[+name]]". Do you want to unsubscribe?';
+$_lang['sendex_subscribe_activate_subject'] = 'Confirm your email!';
+$_lang['sendex_subscribe_err_already'] = 'This email is already subscribed to newsletter.';
+$_lang['sendex_subscribe_err_email_wrong'] = 'Wrong email.';
+$_lang['sendex_subscribe_err_email_ns'] = 'You need to specify email.';
